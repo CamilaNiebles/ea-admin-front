@@ -5,13 +5,12 @@ import type {
   CreateSchoolDto,
   UpdateSchoolDto,
 } from './schools.types'
-import type { PaginatedResponse } from '@/features/organizations/organizations.types'
 
-const BASE = '/institutions/schools'
+const BASE = '/schools'
 
 export const schoolsService = {
-  list(params?: SchoolQueryParams): Promise<PaginatedResponse<School>> {
-    return get<PaginatedResponse<School>>(BASE, { params })
+  list(params?: SchoolQueryParams): Promise<School[]> {
+    return get<School[]>(BASE, { params })
   },
 
   getById(id: string): Promise<School> {

@@ -1,25 +1,25 @@
 import api, { get, post } from '@/lib/api'
 import type {
   Organization,
-  PaginatedResponse,
   OrgQueryParams,
   CreateOrganizationDto,
+  CreateOrganizationResponse,
   UpdateOrganizationDto,
 } from './organizations.types'
 
 const BASE = '/organizations'
 
 export const organizationsService = {
-  list(params?: OrgQueryParams): Promise<PaginatedResponse<Organization>> {
-    return get<PaginatedResponse<Organization>>(BASE, { params })
+  list(params?: OrgQueryParams): Promise<Organization[]> {
+    return get<Organization[]>(BASE, { params })
   },
 
   getById(id: string): Promise<Organization> {
     return get<Organization>(`${BASE}/${id}`)
   },
 
-  create(dto: CreateOrganizationDto): Promise<Organization> {
-    return post<Organization>(BASE, dto)
+  create(dto: CreateOrganizationDto): Promise<CreateOrganizationResponse> {
+    return post<CreateOrganizationResponse>(BASE, dto)
   },
 
   update(id: string, dto: UpdateOrganizationDto): Promise<Organization> {

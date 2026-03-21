@@ -3,11 +3,12 @@ import { type ReactNode, useId } from 'react'
 interface FormFieldProps {
   label: string
   error?: string
+  hint?: string
   required?: boolean
   children: (id: string) => ReactNode
 }
 
-export function FormField({ label, error, required, children }: FormFieldProps) {
+export function FormField({ label, error, hint, required, children }: FormFieldProps) {
   const id = useId()
   return (
     <div className="flex flex-col gap-1.5">
@@ -16,6 +17,7 @@ export function FormField({ label, error, required, children }: FormFieldProps) 
         {required && <span className="text-destructive ml-0.5">*</span>}
       </label>
       {children(id)}
+      {hint && !error && <p className="text-xs text-muted-foreground">{hint}</p>}
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
   )

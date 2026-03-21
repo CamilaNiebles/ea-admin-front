@@ -6,18 +6,15 @@ export type OrgStatus = 'active' | 'suspended' | 'trial'
 export interface Organization {
   id: string
   name: string
-  nit: string
-  contact_email: string
-  contact_phone: string
-  country: string
-  city: string
-  plan: OrgPlan
+  nit?: string
+  email?: string
+  telephoneNumber?: string
+  country?: string
+  city?: string
   status: OrgStatus
-  max_students: number
-  trial_ends_at: string | null
-  license_expires_at: string | null
+  createdAt: string
+  updatedAt: string
   schools?: School[]
-  created_at: string
 }
 
 export interface PaginatedResponse<T> {
@@ -34,16 +31,25 @@ export interface OrgQueryParams {
   limit?: number
 }
 
+export interface FirstSchoolDto {
+  name: string
+  city?: string
+  trialEndsAt?: string
+}
+
 export interface CreateOrganizationDto {
   name: string
-  nit: string
-  contact_email: string
-  contact_phone: string
-  country: string
-  city: string
-  plan: OrgPlan
-  max_students: number
-  trial_ends_at?: string | null
+  nit?: string
+  email?: string
+  telephoneNumber?: string
+  country?: string
+  city?: string
+  firstSchool: FirstSchoolDto
+}
+
+export interface CreateOrganizationResponse {
+  organization: Organization
+  school: School
 }
 
 export interface UpdateOrganizationDto {

@@ -6,22 +6,9 @@ import { useOrganization } from './hooks/useOrganizations'
 import { useUpdateOrganization } from './hooks/useOrganizationsMutations'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { FormField, inputClass, selectClass } from '@/components/ui/FormField'
-import type { OrgPlan, OrgStatus, UpdateOrganizationDto } from './organizations.types'
+import { FormField, selectClass } from '@/components/ui/FormField'
+import type { OrgStatus, UpdateOrganizationDto } from './organizations.types'
 
-const planLabels: Record<OrgPlan, string> = {
-  semilla: 'Semilla',
-  arbol: 'Árbol',
-  bosque: 'Bosque',
-  campus: 'Campus',
-}
-
-const planVariants: Record<OrgPlan, 'default' | 'success' | 'warning' | 'secondary'> = {
-  semilla: 'secondary',
-  arbol: 'default',
-  bosque: 'success',
-  campus: 'warning',
-}
 
 const statusLabels: Record<OrgStatus, string> = {
   active: 'Activa',
@@ -36,10 +23,7 @@ const statusVariants: Record<OrgStatus, 'success' | 'destructive' | 'warning'> =
 }
 
 interface EditForm {
-  plan: OrgPlan
   status: OrgStatus
-  max_students: string
-  license_expires_at: string
 }
 
 export default function OrganizationDetailPage() {
@@ -54,14 +38,7 @@ export default function OrganizationDetailPage() {
 
   function startEdit() {
     if (!org) return
-    setEditForm({
-      plan: org.plan,
-      status: org.status,
-      max_students: String(org.max_students),
-      license_expires_at: org.license_expires_at
-        ? org.license_expires_at.split('T')[0]
-        : '',
-    })
+    setEditForm({ status: org.status })
     setEditing(true)
     setServerError(null)
   }
@@ -72,17 +49,10 @@ export default function OrganizationDetailPage() {
     setServerError(null)
   }
 
-  function setField(field: keyof EditForm, value: string) {
-    setEditForm((prev) => (prev ? { ...prev, [field]: value } : prev))
-  }
-
   function handleSave() {
     if (!editForm) return
     const dto: UpdateOrganizationDto = {
-      plan: editForm.plan,
       status: editForm.status,
-      max_students: Number(editForm.max_students),
-      license_expires_at: editForm.license_expires_at || null,
     }
     updateMutation.mutate(dto, {
       onSuccess: () => {
@@ -133,7 +103,6 @@ export default function OrganizationDetailPage() {
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl font-semibold text-foreground">{org.name}</h1>
-            <Badge variant={planVariants[org.plan]}>{planLabels[org.plan]}</Badge>
             <Badge variant={statusVariants[org.status]}>{statusLabels[org.status]}</Badge>
           </div>
           {!editing && (
@@ -162,27 +131,15 @@ export default function OrganizationDetailPage() {
           </div>
           <div>
             <dt className="text-muted-foreground">Correo de contacto</dt>
-            <dd className="font-medium mt-0.5 break-all">{org.contact_email}</dd>
+            <dd className="font-medium mt-0.5 break-all">{org.email ?? '—'}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Teléfono</dt>
-            <dd className="font-medium mt-0.5">{org.contact_phone}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Máx. estudiantes</dt>
-            <dd className="font-medium mt-0.5">{org.max_students.toLocaleString('es-CO')}</dd>
+            <dd className="font-medium mt-0.5">{org.telephoneNumber ?? '—'}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Creada</dt>
-            <dd className="font-medium mt-0.5">{formatDate(org.created_at)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Fin de prueba</dt>
-            <dd className="font-medium mt-0.5">{formatDate(org.trial_ends_at)}</dd>
-          </div>
-          <div>
-            <dt className="text-muted-foreground">Vencimiento licencia</dt>
-            <dd className="font-medium mt-0.5">{formatDate(org.license_expires_at)}</dd>
+            <dd className="font-medium mt-0.5">{formatDate(org.createdAt)}</dd>
           </div>
         </dl>
       </div>
@@ -191,60 +148,21 @@ export default function OrganizationDetailPage() {
       {editing && editForm && (
         <div className="rounded-lg border border-border bg-background p-5 space-y-4">
           <h2 className="text-base font-medium text-foreground">Editar organización</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <FormField label="Plan" required>
-              {(id) => (
-                <select
-                  id={id}
-                  className={selectClass}
-                  value={editForm.plan}
-                  onChange={(e) => setField('plan', e.target.value)}
-                >
-                  <option value="semilla">Semilla</option>
-                  <option value="arbol">Árbol</option>
-                  <option value="bosque">Bosque</option>
-                  <option value="campus">Campus</option>
-                </select>
-              )}
-            </FormField>
-
+          <div className="max-w-xs">
             <FormField label="Estado" required>
               {(id) => (
                 <select
                   id={id}
                   className={selectClass}
                   value={editForm.status}
-                  onChange={(e) => setField('status', e.target.value)}
+                  onChange={(e) =>
+                    setEditForm((prev) => prev ? { ...prev, status: e.target.value as OrgStatus } : prev)
+                  }
                 >
                   <option value="active">Activa</option>
                   <option value="suspended">Suspendida</option>
                   <option value="trial">Prueba</option>
                 </select>
-              )}
-            </FormField>
-
-            <FormField label="Máximo de estudiantes" required>
-              {(id) => (
-                <input
-                  id={id}
-                  type="number"
-                  min={1}
-                  className={inputClass}
-                  value={editForm.max_students}
-                  onChange={(e) => setField('max_students', e.target.value)}
-                />
-              )}
-            </FormField>
-
-            <FormField label="Vencimiento de licencia">
-              {(id) => (
-                <input
-                  id={id}
-                  type="date"
-                  className={inputClass}
-                  value={editForm.license_expires_at}
-                  onChange={(e) => setField('license_expires_at', e.target.value)}
-                />
               )}
             </FormField>
           </div>

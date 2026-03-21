@@ -1,20 +1,16 @@
-import type { SchoolMember } from '@/features/schools/members.types'
-
-export type EducationLevel = 'preschool' | 'elementary' | 'both'
-export type SchoolStatus = 'active' | 'inactive'
+export type SchoolStatus = 'active' | 'inactive' | 'trial'
 
 export interface School {
   id: string
-  organization_id: string
+  organizationId: string
   name: string
-  address: string
   city: string
-  dane_code: string
-  education_level: EducationLevel
   status: SchoolStatus
-  student_count: number
-  members?: SchoolMember[]
-  created_at: string
+  planId: string
+  planStartDate: string
+  planEndDate: string
+  createdAt: string
+  updatedAt: string
 }
 
 export interface SchoolQueryParams {
@@ -25,20 +21,13 @@ export interface SchoolQueryParams {
 }
 
 export interface CreateSchoolDto {
-  organization_id: string
+  organizationId: string
   name: string
-  address: string
   city: string
-  dane_code: string
-  education_level: EducationLevel
-  student_count: number
 }
 
 export interface UpdateSchoolDto {
   name?: string
-  address?: string
   city?: string
-  education_level?: EducationLevel
   status?: SchoolStatus
-  student_count?: number
 }

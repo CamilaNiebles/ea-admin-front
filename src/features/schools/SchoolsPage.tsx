@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Plus, School as SchoolIcon } from 'lucide-react'
 import { useSchools } from './hooks/useSchools'
@@ -6,36 +5,26 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
-import type { School, EducationLevel, SchoolStatus } from './schools.types'
+import type { School, SchoolStatus } from './schools.types'
 
-const LIMIT = 10
-
-const levelLabels: Record<EducationLevel, string> = {
-  preschool: 'Preescolar',
-  elementary: 'Primaria',
-  both: 'Preescolar y primaria',
-}
-
-const statusVariants: Record<SchoolStatus, 'success' | 'destructive'> = {
+const statusVariants: Record<SchoolStatus, 'success' | 'destructive' | 'warning'> = {
   active: 'success',
   inactive: 'destructive',
+  trial: 'warning',
 }
 
 const statusLabels: Record<SchoolStatus, string> = {
   active: 'Activo',
   inactive: 'Inactivo',
+  trial: 'Prueba',
 }
 
 export default function SchoolsPage() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const organizationId = searchParams.get('organization_id') ?? undefined
-  const [page, setPage] = useState(1)
 
-  const { data, isLoading } = useSchools({ organization_id: organizationId, page, limit: LIMIT })
-
-  const total = data?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT))
+  const { data, isLoading } = useSchools({ organization_id: organizationId })
 
   const columns: Column<School>[] = [
     {
@@ -49,11 +38,6 @@ export default function SchoolsPage() {
       render: (row) => row.city,
     },
     {
-      key: 'education_level',
-      header: 'Nivel educativo',
-      render: (row) => levelLabels[row.education_level],
-    },
-    {
       key: 'status',
       header: 'Estado',
       render: (row) => (
@@ -61,14 +45,9 @@ export default function SchoolsPage() {
       ),
     },
     {
-      key: 'student_count',
-      header: 'Estudiantes',
-      render: (row) => row.student_count.toLocaleString('es-CO'),
-    },
-    {
-      key: 'dane_code',
-      header: 'Código DANE',
-      render: (row) => <span className="font-mono text-xs">{row.dane_code}</span>,
+      key: 'planEndDate',
+      header: 'Fin de plan',
+      render: (row) => new Date(row.planEndDate).toLocaleDateString('es-CO'),
     },
     {
       key: 'actions',
@@ -111,7 +90,7 @@ export default function SchoolsPage() {
 
       <DataTable
         columns={columns}
-        data={data?.data ?? []}
+        data={data ?? []}
         isLoading={isLoading}
         onRowClick={(row) => navigate(`/dashboard/schools/${row.id}`)}
         emptyState={
@@ -122,33 +101,6 @@ export default function SchoolsPage() {
           />
         }
       />
-
-      {!isLoading && total > 0 && (
-        <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            {total} colegio{total !== 1 ? 's' : ''} en total
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-              className="rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Anterior
-            </button>
-            <span>
-              Página {page} de {totalPages}
-            </span>
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-              className="rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Siguiente
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   )
 }

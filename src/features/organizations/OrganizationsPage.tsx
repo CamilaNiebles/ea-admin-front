@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Plus, Building2 } from 'lucide-react'
 import { useOrganizations } from './hooks/useOrganizations'
@@ -6,23 +5,7 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { DataTable, type Column } from '@/components/ui/DataTable'
 import { Badge } from '@/components/ui/Badge'
 import { EmptyState } from '@/components/ui/EmptyState'
-import type { Organization, OrgPlan, OrgStatus } from './organizations.types'
-
-const LIMIT = 10
-
-const planLabels: Record<OrgPlan, string> = {
-  semilla: 'Semilla',
-  arbol: 'Árbol',
-  bosque: 'Bosque',
-  campus: 'Campus',
-}
-
-const planVariants: Record<OrgPlan, 'default' | 'success' | 'warning' | 'secondary'> = {
-  semilla: 'secondary',
-  arbol: 'default',
-  bosque: 'success',
-  campus: 'warning',
-}
+import type { Organization, OrgStatus } from './organizations.types'
 
 const statusLabels: Record<OrgStatus, string> = {
   active: 'Activa',
@@ -38,11 +21,9 @@ const statusVariants: Record<OrgStatus, 'success' | 'destructive' | 'warning'> =
 
 export default function OrganizationsPage() {
   const navigate = useNavigate()
-  const [page, setPage] = useState(1)
-  const { data, isLoading } = useOrganizations({ page, limit: LIMIT })
+  const { data, isLoading } = useOrganizations()
 
-  const total = data?.total ?? 0
-  const totalPages = Math.max(1, Math.ceil(total / LIMIT))
+  const total = data?.length ?? 0
 
   const columns: Column<Organization>[] = [
     {
@@ -53,19 +34,12 @@ export default function OrganizationsPage() {
     {
       key: 'nit',
       header: 'NIT',
-      render: (row) => row.nit,
+      render: (row) => row.nit ?? '—',
     },
     {
       key: 'city',
       header: 'Ciudad',
-      render: (row) => row.city,
-    },
-    {
-      key: 'plan',
-      header: 'Plan',
-      render: (row) => (
-        <Badge variant={planVariants[row.plan]}>{planLabels[row.plan]}</Badge>
-      ),
+      render: (row) => row.city ?? '—',
     },
     {
       key: 'status',
@@ -73,11 +47,6 @@ export default function OrganizationsPage() {
       render: (row) => (
         <Badge variant={statusVariants[row.status]}>{statusLabels[row.status]}</Badge>
       ),
-    },
-    {
-      key: 'max_students',
-      header: 'Máx. estudiantes',
-      render: (row) => row.max_students.toLocaleString('es-CO'),
     },
     {
       key: 'actions',
@@ -114,7 +83,7 @@ export default function OrganizationsPage() {
 
       <DataTable
         columns={columns}
-        data={data?.data ?? []}
+        data={data ?? []}
         isLoading={isLoading}
         onRowClick={(row) => navigate(`/dashboard/organizations/${row.id}`)}
         emptyState={
@@ -127,29 +96,8 @@ export default function OrganizationsPage() {
       />
 
       {!isLoading && total > 0 && (
-        <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-          <span>
-            {total} organización{total !== 1 ? 'es' : ''} en total
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              disabled={page <= 1}
-              onClick={() => setPage((p) => p - 1)}
-              className="rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Anterior
-            </button>
-            <span>
-              Página {page} de {totalPages}
-            </span>
-            <button
-              disabled={page >= totalPages}
-              onClick={() => setPage((p) => p + 1)}
-              className="rounded-md border border-input px-3 py-1.5 text-sm hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-            >
-              Siguiente
-            </button>
-          </div>
+        <div className="mt-4 text-sm text-muted-foreground">
+          {total} organización{total !== 1 ? 'es' : ''} en total
         </div>
       )}
     </div>

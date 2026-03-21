@@ -1,19 +1,42 @@
 import { Building2, School, Users, Activity } from 'lucide-react'
+import { useDashboardSummary } from './hooks/useDashboardSummary'
+import type { DashboardSummary } from './dashboard.types'
 
 interface StatCard {
   label: string
   icon: React.ReactNode
+  value: number | undefined
 }
 
-const stats: StatCard[] = [
-  { label: 'Total Organizaciones', icon: <Building2 size={20} className="text-blue-500" /> },
-  { label: 'Total Colegios', icon: <School size={20} className="text-green-500" /> },
-  { label: 'Total Estudiantes', icon: <Users size={20} className="text-purple-500" /> },
-  { label: 'Total Sesiones', icon: <Activity size={20} className="text-orange-500" /> },
-]
+function buildStats(data: DashboardSummary | undefined): StatCard[] {
+  return [
+    {
+      label: 'Total Organizaciones',
+      icon: <Building2 size={20} className="text-blue-500" />,
+      value: data?.organizations.total,
+    },
+    {
+      label: 'Total Colegios',
+      icon: <School size={20} className="text-green-500" />,
+      value: data?.schools.total,
+    },
+    {
+      label: 'Total Estudiantes',
+      icon: <Users size={20} className="text-purple-500" />,
+      value: data?.students.total,
+    },
+    {
+      label: 'Total Sesiones',
+      icon: <Activity size={20} className="text-orange-500" />,
+      value: data?.sessions.total,
+    },
+  ]
+}
 
-// TODO: fetch real stats when aggregation endpoints are available
 export default function DashboardPage() {
+  const { data } = useDashboardSummary()
+  const stats = buildStats(data)
+
   return (
     <div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -27,7 +50,9 @@ export default function DashboardPage() {
             </div>
             <div>
               <p className="text-xs text-gray-500 font-medium">{stat.label}</p>
-              <p className="text-2xl font-bold text-gray-900 mt-0.5">—</p>
+              <p className="text-2xl font-bold text-gray-900 mt-0.5">
+                {stat.value ?? '—'}
+              </p>
             </div>
           </div>
         ))}

@@ -40,7 +40,7 @@ export default function SchoolNewPage() {
     setForm((prev) => ({ ...prev, [field]: value }))
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setServerError(null)
     createMutation.mutate(
@@ -86,7 +86,7 @@ export default function SchoolNewPage() {
               required
             >
               <option value="">Selecciona una organización</option>
-              {orgsData?.data.map((org) => (
+              {orgsData?.data?.map((org) => (
                 <option key={org.id} value={org.id}>
                   {org.name}
                 </option>
