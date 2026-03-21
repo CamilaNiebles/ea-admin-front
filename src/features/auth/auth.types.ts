@@ -3,19 +3,18 @@ export interface LoginRequest {
   password: string
 }
 
-export interface AuthTokens {
-  accessToken: string
-  refreshToken: string
-}
-
 export interface AuthUser {
   id: string
-  email: string
-  name: string
+  email?: string
+  full_name: string
   role: string
+  institution_id: string | null
 }
 
 export interface LoginResponse {
-  tokens: AuthTokens
-  user: AuthUser
+    accessToken: string
+    idToken: string
+    refreshToken: string
+    expiresIn: number
 }
+

@@ -24,7 +24,8 @@ export default function Sidebar() {
     navigate('/login', { replace: true })
   }
 
-  function getInitials(name: string) {
+  function getInitials(name: string | undefined) {
+    if (!name) return '?'
     return name
       .split(' ')
       .map((n) => n[0])
@@ -70,11 +71,11 @@ export default function Sidebar() {
         {user && (
           <div className="flex items-center gap-3 px-2 py-2 mb-1">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-              <span className="text-primary text-xs font-semibold">{getInitials(user.name)}</span>
+              <span className="text-primary text-xs font-semibold">{getInitials(user.full_name)}</span>
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{user.name}</p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              <p className="text-sm font-medium text-gray-900 truncate">{user.full_name}</p>
+              <p className="text-xs text-gray-500 truncate">{user.email ?? ""}</p>
             </div>
           </div>
         )}

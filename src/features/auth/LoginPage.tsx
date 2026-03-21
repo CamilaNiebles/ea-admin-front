@@ -1,5 +1,7 @@
 import { FormEvent, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
+import axios from 'axios'
 import { useAuth } from './AuthContext'
 
 export default function LoginPage() {
@@ -8,6 +10,7 @@ export default function LoginPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -22,8 +25,21 @@ export default function LoginPage() {
     try {
       await login(email, password)
       navigate('/dashboard', { replace: true })
-    } catch {
-      setError('Credenciales incorrectas. Verifica tu correo y contraseña.')
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        if (!err.response) {
+          // Network error / CORS / server down
+          setError('No se pudo conectar al servidor. Verifica que el backend esté en ejecución.')
+        } else if (err.response.status === 401 || err.response.status === 403) {
+          const msg = err.response.data?.message
+          setError(typeof msg === 'string' ? msg : 'Credenciales incorrectas. Verifica tu correo y contraseña.')
+        } else {
+          const msg = err.response.data?.message ?? `Error del servidor (${err.response.status})`
+          setError(typeof msg === 'string' ? msg : JSON.stringify(msg))
+        }
+      } else {
+        setError('Error inesperado. Intenta de nuevo.')
+      }
     } finally {
       setSubmitting(false)
     }
@@ -66,16 +82,27 @@ export default function LoginPage() {
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Contraseña
               </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
-              />
+              <div className="relative">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-colors"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-400 hover:text-gray-600 transition-colors"
+                  tabIndex={-1}
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
 
             {error && (

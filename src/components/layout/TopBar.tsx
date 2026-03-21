@@ -24,7 +24,8 @@ function getPageTitle(pathname: string): string {
   return 'EduAdmin'
 }
 
-function getInitials(name: string) {
+function getInitials(name: string | undefined) {
+  if (!name) return '?'
   return name
     .split(' ')
     .map((n) => n[0])
@@ -44,10 +45,10 @@ export default function TopBar() {
       {user && (
         <div className="flex items-center gap-3">
           <div className="text-right hidden sm:block">
-            <p className="text-sm font-medium text-gray-900">{user.name}</p>
+            <p className="text-sm font-medium text-gray-900">{user.full_name}</p>
           </div>
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <span className="text-primary text-xs font-semibold">{getInitials(user.name)}</span>
+            <span className="text-primary text-xs font-semibold">{getInitials(user.full_name)}</span>
           </div>
         </div>
       )}
